@@ -1,18 +1,7 @@
 {
   "Comment": "Workflow to process files uploaded to S3, extract text using Textract, and send results to SQS.",
-  "StartAt": "DetectFileType",
+  "StartAt": "StartDocumentTextDetection",
   "States": {
-    "DetectFileType": {
-      "Type": "Choice",
-      "Default": "DetectDocumentText",
-      "Choices": [
-        {
-          "Next": "StartDocumentTextDetection",
-          "Condition": "{% $states.input.file_extension = \".pdf\"%}"
-        }
-      ],
-      "QueryLanguage": "JSONata"
-    },
     "StartDocumentTextDetection": {
       "Type": "Task",
       "Resource": "arn:aws:states:::aws-sdk:textract:startDocumentTextDetection",
@@ -49,7 +38,8 @@
         "JobId": "{% $JobId %}"
       },
       "Output": {
-        "JobStatus": "{% $states.result.JobStatus %}"
+        "JobStatus": "{% $states.result.JobStatus %}",
+        "result": "{% $states.result %}"
       }
     },
     "IsPDFConversionComplete": {
@@ -57,7 +47,7 @@
       "Default": "WaitForPDFConversion",
       "Choices": [
         {
-          "Next": "DetectDocumentText",
+          "Next": "Pass",
           "Condition": "{% $states.input.JobStatus = \"SUCCEEDED\" %}"
         },
         {
@@ -72,23 +62,6 @@
       "Cause": "PDF to JPEG conversion failed.",
       "Error": "PDFConversionFailed",
       "QueryLanguage": "JSONata"
-    },
-    "DetectDocumentText": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::aws-sdk:textract:detectDocumentText",
-      "Next": "Pass",
-      "QueryLanguage": "JSONata",
-      "Arguments": {
-        "Document": {
-          "S3Object": {
-            "Bucket": "{% $states.context.Execution.Input.bucket_name %}",
-            "Name": "{% $states.context.Execution.Input.object_key %}"
-          }
-        }
-      },
-      "Output": {
-        "result": "{% $states.result %}"
-      }
     },
     "Pass": {
       "Type": "Pass",
