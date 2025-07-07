@@ -269,8 +269,8 @@ class MultiModalStrandsAgentStack(Stack):
         # create a pinecone cdk resource
 
         pinecone_vec = PineconeVectorStore(
-            connection_string="https://multi-modal-strands-agent-pbfqwcb.svc.aped-4627-b74a.pinecone.io",
-            credentials_secret_arn="arn:aws:secretsmanager:us-east-1:132260253285:secret:pinecone-j4JvqP",
+            connection_string="https://m7-9789jkj.io",
+            credentials_secret_arn="arn::-khjjjkj4JvqP",
             text_field="text",
             metadata_field="metadata",
         )
