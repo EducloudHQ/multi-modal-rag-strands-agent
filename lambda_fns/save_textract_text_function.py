@@ -23,6 +23,7 @@ def lambda_handler(event, context: LambdaContext):
     logger.info("Received extracted text event")
     logger.info(f"received event {event}")
     logger.info(f"text {event['text']}")
+    # saves to kb with strands agent
     result = saver.store_text(
         event["text"],
         metadata={"source": "textract-lambda", "userId": "UserID"},

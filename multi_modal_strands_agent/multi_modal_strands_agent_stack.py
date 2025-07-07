@@ -35,7 +35,7 @@ class MultiModalStrandsAgentStack(Stack):
         ## s3 bucket
         multi_modal_bucket = s3.Bucket(
             self,
-            "grocery-list-bucket",
+            "multi-modal-rag-bucket",
             versioned=False,
             removal_policy=RemovalPolicy.DESTROY,
             encryption=s3.BucketEncryption.S3_MANAGED,
@@ -52,7 +52,7 @@ class MultiModalStrandsAgentStack(Stack):
             handler="lambda_handler",
             memory_size=512,
             tracing=Tracing.ACTIVE,
-            timeout=Duration.minutes(10),
+            timeout=Duration.minutes(5),
         )
         # Lambda functions
         queue_processor_function = PythonFunction(
@@ -64,7 +64,7 @@ class MultiModalStrandsAgentStack(Stack):
             handler="lambda_handler",
             tracing=Tracing.ACTIVE,
             memory_size=1024,
-            timeout=Duration.minutes(10),
+            timeout=Duration.minutes(5),
         )
 
         # Lambda functions
@@ -103,6 +103,7 @@ class MultiModalStrandsAgentStack(Stack):
         self.sqs_queue = sqs.Queue(
             self,
             "MultiModalQueue",
+            visibility_timeout=Duration.minutes(50),
             dead_letter_queue=sqs.DeadLetterQueue(
                 max_receive_count=3,
                 queue=dlq,  # Retry 3 times before sending to DLQ
@@ -268,7 +269,7 @@ class MultiModalStrandsAgentStack(Stack):
         # create a pinecone cdk resource
 
         pinecone_vec = PineconeVectorStore(
-            connection_string="https://test-strands-agent-vd-pbfqwcb.svc.aped-4627-b74a.pinecone.io",
+            connection_string="https://multi-modal-strands-agent-pbfqwcb.svc.aped-4627-b74a.pinecone.io",
             credentials_secret_arn="arn:aws:secretsmanager:us-east-1:132260253285:secret:pinecone-j4JvqP",
             text_field="text",
             metadata_field="metadata",
@@ -302,6 +303,7 @@ class MultiModalStrandsAgentStack(Stack):
         queue_processor_function.add_environment(
             "STRANDS_KNOWLEDGE_BASE_ID", agent_knowledge_base.knowledge_base_id
         )
+        queue_processor_function.add_environment("BYPASS_TOOL_CONSENT", "True")
 
         # Output for S3 bucket
         CfnOutput(self, "MultiModalBucketName", value=multi_modal_bucket.bucket_name)

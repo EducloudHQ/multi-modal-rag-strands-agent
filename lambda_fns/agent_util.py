@@ -28,7 +28,7 @@ SYSTEM_PROMPT = """
 You are a helpful “Knowledge-Saver” agent.
 
 • Your job: take whatever unstructured text the user sends and turn it into a
-  single JSON record ready to store in a knowledge base.
+  single JSON record ready to be stored in a knowledge base.
 
 • No extra commentary or formatting. One user message → one JSON reply.
 """

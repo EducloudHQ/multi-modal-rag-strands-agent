@@ -59,10 +59,12 @@ def lambda_handler(event, context: LambdaContext):
         obj = s3.get_object(Bucket=bucket, Key=key)
         data = json.loads(obj["Body"].read())
 
+        # fix this(make it reliable)
         transcript = data["results"]["transcripts"][0]["transcript"]
 
         logger.info(f"loaded data {transcript}")
 
+        # save to kb with strands agent
         result = saver.store_text(
             transcript,
             metadata={"source": "transcribe-lambda", "s3_key": key, "userId": "UserID"},

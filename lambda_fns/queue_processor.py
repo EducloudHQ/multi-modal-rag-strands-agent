@@ -80,7 +80,7 @@ def lambda_handler(event: SQSEvent, context: LambdaContext):
                 logger.warning("Missing bucket or key in message")
                 continue
 
-            if extension in [".md", ".csv"]:
+            if extension in [".md", ".csv", ".txt", ".doc", ".docx"]:
                 try:
                     obj = s3_client.get_object(Bucket=bucket_name, Key=object_key)
                     body = obj["Body"].read().decode("utf-8", errors="replace")
@@ -89,6 +89,8 @@ def lambda_handler(event: SQSEvent, context: LambdaContext):
                     logger.info(
                         f"🔹 {object_key} content (first 4 KB shown):\n{body[:4096]}"
                     )
+
+                    # save to knowledge
 
                     result = saver.store_text(
                         body,
@@ -107,19 +109,7 @@ def lambda_handler(event: SQSEvent, context: LambdaContext):
                 # Skip Step Functions for .md / .csv
                 continue
 
-            if extension in [
-                ".pdf",
-                ".png",
-                ".md",
-                ".csv",
-                ".jpg",
-                ".jpeg",
-                ".tiff",
-                ".tif",
-                ".doc",
-                ".docx",
-                ".txt",
-            ]:
+            if extension in [".pdf", ".png", ".jpg", ".jpeg", ".tiff", ".tif"]:
                 # Invoke the extract text workflow for document files
                 logger.info(f"Invoking extract text workflow for {object_key}")
 
@@ -143,7 +133,7 @@ def lambda_handler(event: SQSEvent, context: LambdaContext):
                     f"Started extract text workflow execution: {response['executionArn']}"
                 )
 
-            elif extension in [".mp4", ".mov", ".avi", ".mkv"]:
+            elif extension in [".mp4", ".mov", ".avi", ".mkv", ".mp3"]:
                 # Invoke the transcribe media workflow for video files
                 logger.info(f"Invoking transcribe media workflow for {object_key}")
 
